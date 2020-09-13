@@ -8,7 +8,16 @@
 import UIKit
 
 class ViewController: UIViewController {
-
+    
+    var uiElements = ["UISegmentedControl",
+                      "UILable",
+                      "UISlaider",
+                      "UITextField",
+                      "UIButton",
+                      "UIDatePicker"]
+    
+    var selectedElement: String?
+    
     @IBOutlet weak var segmentedControl: UISegmentedControl!
     @IBOutlet weak var label: UILabel!
     @IBOutlet weak var slider: UISlider!
@@ -39,8 +48,55 @@ class ViewController: UIViewController {
         
         datePicker.locale = Locale(identifier: "ru_RU")
         
+        choiceUIElement()
+        createToolbar()
     }
-
+    
+    func hideAllElements() {
+        segmentedControl.isHidden = true
+        label.isHidden = true
+        slider.isHidden = true
+        doneButton.isHidden = true
+        datePicker.isHidden = true
+    }
+    
+    
+    func choiceUIElement() {
+        let elementPicker = UIPickerView()
+        elementPicker.delegate = self
+        
+        textField.inputView = elementPicker
+        
+        // custamization
+        
+        elementPicker.backgroundColor = .brown
+    }
+    
+    func createToolbar() { // toolbar above PickerView
+        
+        let toolbar = UIToolbar()
+        toolbar.sizeToFit()
+        
+        let doneButton = UIBarButtonItem(title: "Done",
+                                         style: .plain,
+                                         target: self,
+                                         action: #selector(dismissKeyboard)) // description of button
+        
+        toolbar.setItems([doneButton], animated: true)
+        toolbar.isUserInteractionEnabled = true // user can interact with button
+        
+        textField.inputAccessoryView = toolbar
+        
+        // castamization
+        
+        toolbar.tintColor = .white
+        toolbar.barTintColor = .brown
+    }
+    
+    @objc func dismissKeyboard() {
+        view.endEditing(true)
+    }
+    
     @IBAction func choiceSegment(_ sender: UISegmentedControl) {
         
         label.isHidden = false
@@ -76,11 +132,11 @@ class ViewController: UIViewController {
             
             let alert = UIAlertController(title: "Wrong format!", message: "Please enter your name", preferredStyle: .alert)
             let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
-
+            
             
             alert.addAction(okAction)
             present(alert, animated: true, completion: nil) // call action alert
-        
+            
             print("Name format is wrong!")
         } else {
             label.text = textField.text
@@ -116,3 +172,61 @@ class ViewController: UIViewController {
     }
 }
 
+extension ViewController:  UIPickerViewDelegate, UIPickerViewDataSource {
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
+        return 1
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        return uiElements.count
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+        return uiElements[row]
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+        selectedElement = uiElements[row]
+        textField.text = selectedElement
+        
+        switch row {
+        case 0:
+            hideAllElements()
+            segmentedControl.isHidden = false
+        case 1:
+            hideAllElements()
+            label.isHidden = false
+        case 2:
+            hideAllElements()
+            slider.isHidden = false
+        case 3:
+            hideAllElements()
+        case 4:
+            hideAllElements()
+            doneButton.isHidden = false
+        case 5:
+            hideAllElements()
+            datePicker.isHidden = false
+        default:
+            hideAllElements()
+        }
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, viewForRow row: Int, forComponent component: Int, reusing view: UIView?) -> UIView {
+        
+        var pickerViewLabel = UILabel()
+        
+        if let currentLabel = view as? UILabel {
+            pickerViewLabel = currentLabel
+        } else {
+            pickerViewLabel = UILabel()
+        }
+        
+        pickerViewLabel.textColor = .white
+        pickerViewLabel.textAlignment = .center
+        pickerViewLabel.font = UIFont(name: "AppleSDGothicNeo-Regular", size: 23)
+        pickerViewLabel.text = uiElements[row]
+        
+        return pickerViewLabel
+    }
+}
